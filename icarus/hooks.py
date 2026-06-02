@@ -19,6 +19,7 @@ _OPENROUTER_KEY = (
 )
 _EXTRACTION_MODEL = os.environ.get("ICARUS_EXTRACTION_MODEL", "deepseek/deepseek-v4-flash")
 _EXTRACTION_MAX_TOKENS = int(os.environ.get("ICARUS_EXTRACTION_MAX_TOKENS", "1024"))
+_OPENROUTER_BASE_URL = os.environ.get("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
 
 logger = logging.getLogger(__name__)
 
@@ -633,7 +634,7 @@ def _llm_extract_entries(transcript):
 
     try:
         req = urllib.request.Request(
-            "https://openrouter.ai/api/v1/chat/completions",
+            f"{_OPENROUTER_BASE_URL}/chat/completions",
             data=payload,
             headers={
                 "Authorization": f"Bearer {_OPENROUTER_KEY}",

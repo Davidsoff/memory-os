@@ -25,6 +25,7 @@ from pathlib import Path
 
 # ─── Config ────────────────────────────────────────────────────────────────
 OPENROUTER_KEY = os.environ.get("OPENROUTER_API_KEY")
+OPENROUTER_BASE_URL = os.environ.get("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
 QDRANT_URL = os.environ.get("QDRANT_URL", "http://localhost:6333")
 COLLECTION = os.environ.get("QDRANT_COLLECTION", "knowledge_base")
 if not OPENROUTER_KEY:
@@ -92,7 +93,7 @@ def embed_text(text: str) -> Optional[List[float]]:
         return None
     try:
         r = requests.post(
-            "https://openrouter.ai/api/v1/embeddings",
+            f"{OPENROUTER_BASE_URL}/embeddings",
             headers={
                 "Authorization": f"Bearer {OPENROUTER_KEY}",
                 "Content-Type": "application/json"

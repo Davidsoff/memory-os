@@ -30,6 +30,7 @@ from datetime import datetime, timezone
 
 # ─── Config ────────────────────────────────────────────────────────────────
 OPENROUTER_KEY = os.environ.get("OPENROUTER_API_KEY")
+OPENROUTER_BASE_URL = os.environ.get("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
 if not OPENROUTER_KEY:
     env_path = Path.home() / ".env"
     if env_path.exists():
@@ -145,7 +146,7 @@ def embed_query(text: str) -> Optional[List[float]]:
         return None
     try:
         resp = requests.post(
-            "https://openrouter.ai/api/v1/embeddings",
+            f"{OPENROUTER_BASE_URL}/embeddings",
             headers={
                 "Authorization": f"Bearer {OPENROUTER_KEY}",
                 "Content-Type": "application/json"

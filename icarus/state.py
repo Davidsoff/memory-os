@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 FABRIC_DIR = Path(os.environ.get("FABRIC_DIR", Path.home() / "fabric"))
 HERMES_HOME = Path(os.environ.get("HERMES_HOME", "")) if os.environ.get("HERMES_HOME") else None
 AGENT_NAME = os.environ.get("HERMES_AGENT_NAME", "")
+TOGETHER_BASE_URL = os.environ.get("TOGETHER_BASE_URL", "https://api.together.xyz/v1")
 PLUGIN_DIR = Path(__file__).parent
 
 if not AGENT_NAME and HERMES_HOME and ".hermes-" in str(HERMES_HOME):
@@ -723,7 +724,7 @@ def start_training(model=None, suffix=None, epochs=3, batch_size=None, learning_
     ).encode()
 
     req = urllib.request.Request(
-        "https://api.together.xyz/v1/files/upload",
+        f"{TOGETHER_BASE_URL}/files/upload",
         data=body,
         headers={
             "Authorization": f"Bearer {key}",
@@ -756,7 +757,7 @@ def start_training(model=None, suffix=None, epochs=3, batch_size=None, learning_
         return {"error": f"n_checkpoints must be >= 1 (got {ft_checkpoints})"}
 
     try:
-        ft_data = _together_request("POST", "https://api.together.xyz/v1/fine-tunes", {
+        ft_data = _together_request("POST", f"{TOGETHER_BASE_URL}/fine-tunes", {
             "training_file": file_id,
             "model": ft_model,
             "n_epochs": epochs,
@@ -814,7 +815,7 @@ def check_training(job_id=None):
     if not jid:
         return {"error": "no job ID — run fabric_train first"}
     try:
-        data = _together_request("GET", f"https://api.together.xyz/v1/fine-tunes/{jid}")
+        data = _together_request("GET", f"{TOGETHER_BASE_URL}/fine-tunes/{jid}")
     except Exception as exc:
         return {"error": f"status check failed: {exc}"}
 
@@ -942,7 +943,7 @@ def switch_model(model_id, min_eval_score=0.7):
         if not l.startswith(("LLM_MODEL=", "OPENAI_BASE_URL=", "OPENAI_API_KEY="))
     ]
     filtered.append(f"LLM_MODEL={model_id}")
-    filtered.append("OPENAI_BASE_URL=https://api.together.xyz/v1")
+    filtered.append(f"OPENAI_BASE_URL={TOGETHER_BASE_URL}")
     filtered.append(f"OPENAI_API_KEY={key}")
 
     # atomic write

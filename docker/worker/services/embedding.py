@@ -12,7 +12,7 @@ logger = logging.getLogger("cognitive-worker.embedding")
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
 EMBEDDING_DIMS = int(os.environ.get("EMBEDDING_DIMS", "4096"))
 EMBEDDING_MODEL = "qwen/qwen3-embedding-8b"
-API_BASE = "https://openrouter.ai/api/v1"
+API_BASE = os.environ.get("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
 
 
 async def get_embedding(text: str) -> list[float]:

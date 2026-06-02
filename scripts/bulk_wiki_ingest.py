@@ -18,6 +18,7 @@ import asyncio
 
 # ─── Config ────────────────────────────────────────────────────────────────
 OPENROUTER_KEY = os.environ.get("OPENROUTER_API_KEY")
+OPENROUTER_BASE_URL = os.environ.get("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
 QDRANT_URL = os.environ.get("QDRANT_URL", "http://localhost:6333")
 COLLECTION = os.environ.get("QDRANT_COLLECTION", os.environ.get("COLLECTION_NAME", "knowledge_base"))
 WIKI_ROOT = Path(os.environ.get("WIKI_ROOT", "."))
@@ -78,7 +79,7 @@ async def get_embedding(session: aiohttp.ClientSession, text: str) -> list[float
     }
     try:
         async with session.post(
-            "https://openrouter.ai/api/v1/embeddings",
+            f"{OPENROUTER_BASE_URL}/embeddings",
             headers={
                 "Authorization": f"Bearer {OPENROUTER_KEY}",
                 "Content-Type": "application/json",

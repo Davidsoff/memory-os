@@ -21,6 +21,7 @@ import urllib.request
 from pathlib import Path
 
 FABRIC_DIR = Path(os.environ.get("FABRIC_DIR", Path.home() / "fabric"))
+TOGETHER_BASE_URL = os.environ.get("TOGETHER_BASE_URL", "https://api.together.xyz/v1")
 
 STOP_WORDS = {"the", "a", "an", "is", "was", "are", "to", "of", "in", "for",
               "on", "with", "it", "and", "or", "not", "i", "you", "this", "that"}
@@ -81,7 +82,7 @@ def call_model(model, prompt, api_key):
     }).encode()
 
     req = urllib.request.Request(
-        "https://api.together.xyz/v1/chat/completions",
+        f"{TOGETHER_BASE_URL}/chat/completions",
         data=data,
         headers={
             "Authorization": f"Bearer {api_key}",
