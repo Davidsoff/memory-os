@@ -106,6 +106,7 @@ services:
 | Qdrant data | `./qdrant_data/` (Docker volume) |
 | Docker compose | Project root |
 | Cron scripts | Project scripts directory |
+| Data flows | [`infrastructure/data-flows.md`](data-flows.md) — external data sent to OpenRouter and Together AI |
 
 ## System requirements
 
