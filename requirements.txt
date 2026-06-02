@@ -1,7 +1,7 @@
 # Memory OS — Host Scripts
-requests>=2.31.0
-aiohttp>=3.9.0
-arq>=0.28.0
-python-dotenv>=1.0.0
-pyyaml>=6.0
-qdrant-client>=1.17.0
+requests==2.34.2
+aiohttp==3.14.0
+arq==0.28.0
+python-dotenv==1.2.2
+pyyaml==6.0.3
+qdrant-client==1.18.0
