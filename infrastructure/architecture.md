@@ -22,8 +22,18 @@ services:
     image: redis:7-alpine
     ports:
       - "6379:6379"
-    command: redis-server --requirepass ${REDIS_PASSWORD}
-    restart: unless-stopped
+    command: >
+      sh -c '
+        mkdir -p /usr/local/etc/redis &&
+        echo "requirepass ${REDIS_PASSWORD}" > /usr/local/etc/redis/redis.conf &&
+        HC_PASS=$(od -An -N8 -tx1 /dev/urandom | tr -d " \n") &&
+        echo "user healthcheck on >${HC_PASS} +ping" > /usr/local/etc/redis/users.acl &&
+        echo "aclfile /usr/local/etc/redis/users.acl" >> /usr/local/etc/redis/redis.conf &&
+        echo ${HC_PASS} > /tmp/redis_healthcheck_pass &&
+        redis-server /usr/local/etc/redis/redis.conf
+      '
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli --user healthcheck -a \"$(cat /tmp/redis_healthcheck_pass)\" ping"]
 
   worker:
     build: ./worker
@@ -106,6 +116,7 @@ services:
 | Qdrant data | `./qdrant_data/` (Docker volume) |
 | Docker compose | Project root |
 | Cron scripts | Project scripts directory |
+| Data flows | [`infrastructure/data-flows.md`](data-flows.md) — external data sent to OpenRouter and Together AI |
 
 ## System requirements
 

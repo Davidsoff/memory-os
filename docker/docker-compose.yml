@@ -15,6 +15,11 @@ services:
         echo "appendonly yes" >> /usr/local/etc/redis/redis.conf &&
         echo "maxmemory 512mb" >> /usr/local/etc/redis/redis.conf &&
         echo "maxmemory-policy allkeys-lru" >> /usr/local/etc/redis/redis.conf &&
+        # Create a restricted ACL healthcheck user: ping-only, separate password
+        HC_PASS=$$(od -An -N8 -tx1 /dev/urandom | tr -d " \n") &&
+        echo "user healthcheck on >$${HC_PASS} +ping" > /usr/local/etc/redis/users.acl &&
+        echo "aclfile /usr/local/etc/redis/users.acl" >> /usr/local/etc/redis/redis.conf &&
+        echo $${HC_PASS} > /tmp/redis_healthcheck_pass &&
         redis-server /usr/local/etc/redis/redis.conf
       '
     environment:
@@ -24,7 +29,9 @@ services:
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      # AUTH via restricted ACL user (ping-only, read from temp file)
+      # $$ escapes Compose substitution — password never baked into the command
+      test: ["CMD-SHELL", "redis-cli --user healthcheck -a \"$$(cat /tmp/redis_healthcheck_pass)\" ping"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -56,16 +63,18 @@ services:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       QDRANT_HOST: qdrant
       QDRANT_PORT: "6333"
+      QDRANT_API_KEY: ${QDRANT_API_KEY:-}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
       EMBEDDING_DIMS: "${EMBEDDING_DIMS:-4096}"
       COLLECTION_NAME: "${COLLECTION_NAME:-knowledge_base}"
       ARQ_JOB_TIMEOUT: "300"
       ARQ_MAX_JOBS: "10"
       ARQ_KEEP_RESULT: "3600"
+      STATE_DB_PATH: /app/state.db
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
     volumes:
       - ${WIKI_PATH:-./wiki}:/wiki:ro
-      - ${HERMES_HOME:-~/.hermes}:/hermes:rw
+      - ${HERMES_HOME:-~/.hermes}/cron/output:/hermes/cron/output:rw
 
 volumes:
   redis_data:
