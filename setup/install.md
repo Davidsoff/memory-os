@@ -63,8 +63,7 @@ docker compose up -d
 Verify:
 ```bash
 curl -s http://localhost:6333/healthz  # → {"title":"ok","version":"1.17.1"}
-redis-cli -a "$REDIS_PASSWORD" ping              # → PONG
-docker compose ps  # healthcheck uses restricted ACL user (no password leak)
+redis-cli -a "$REDIS_PASSWORD" ping    # → PONG
 ```
 
 ### 4. Environment Variables
