@@ -36,7 +36,7 @@ FABRIC_WRITE = {
     "name": "fabric_write",
     "description": (
         "Write a new entry to shared fabric memory. All agents on all platforms "
-        "can read it. Linking guidelines:\n"
+        "can read it. Limits: content body capped at 100KB per entry, total entries capped at 10,000. Set FABRIC_MAX_CONTENT_SIZE and FABRIC_MAX_ENTRIES env vars to override. Linking guidelines:\n"
         "- type='review' + review_of: when you evaluate another agent's work, "
         "link back to the original entry so the chain is traceable.\n"
         "- revises: when you fix or improve an entry after receiving feedback, "

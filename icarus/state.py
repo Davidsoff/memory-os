@@ -24,6 +24,10 @@ PLUGIN_DIR = Path(__file__).parent
 if not AGENT_NAME and HERMES_HOME and ".hermes-" in str(HERMES_HOME):
     AGENT_NAME = str(HERMES_HOME).split(".hermes-")[-1].rstrip("/")
 
+# ── Content size & entry caps ────────────────────────────
+MAX_ENTRY_CONTENT_SIZE = int(os.environ.get("FABRIC_MAX_CONTENT_SIZE", 102400))  # 100KB
+MAX_ENTRIES = int(os.environ.get("FABRIC_MAX_ENTRIES", 10_000))  # 10K default cap
+
 # ── Shared regexes (used by hooks.py and scoring) ────────
 DECISION_RE = re.compile(
     r"(?i)\b(decided|resolved|completed|fixed|deployed|shipped|reviewed|approved|rejected)\b"
@@ -308,6 +312,22 @@ def write_entry(entry_type, content, summary, tier="hot", tags="", platform="cli
                 assigned_to="", training_value="", verified="", evidence="",
                 source_tool="", artifact_paths=""):
     """Write a fabric entry with full schema v1 fields. Returns the filepath."""
+    # ── Content size guard ──
+    content_bytes = len(content.encode("utf-8"))
+    if content_bytes > MAX_ENTRY_CONTENT_SIZE:
+        raise ValueError(
+            f"Content too large: {content_bytes} bytes exceeds max {MAX_ENTRY_CONTENT_SIZE} bytes "
+            f"({MAX_ENTRY_CONTENT_SIZE // 1024}KB). Reduce the content or split into multiple entries."
+        )
+
+    # ── Entry count guard ──
+    existing = sum(1 for _ in FABRIC_DIR.glob("*.md")) if FABRIC_DIR.exists() else 0
+    if existing >= MAX_ENTRIES:
+        raise RuntimeError(
+            f"Fabric full: {existing} entries already exist (cap is {MAX_ENTRIES}). "
+            f"Archive old entries via fabric_curate or increase FABRIC_MAX_ENTRIES."
+        )
+
     FABRIC_DIR.mkdir(parents=True, exist_ok=True)
     now = datetime.now(timezone.utc)
     ts = now.strftime("%Y-%m-%dT%H%MZ")
