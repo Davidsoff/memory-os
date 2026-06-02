@@ -160,7 +160,7 @@ import sqlite3
 import os
 from typing import Optional
 
-STATE_DB_PATH = os.environ.get("STATE_DB_PATH", "/hermes/state.db")
+STATE_DB_PATH = os.environ.get("STATE_DB_PATH", "/app/state.db")
 
 
 def get_budget_for_hour(hour_window: str) -> int:
