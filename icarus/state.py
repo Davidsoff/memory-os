@@ -841,6 +841,8 @@ def check_training(job_id=None):
 
 def run_eval(candidate_model, base_model=None, sample_count=10):
     """Run replacement-model eval. Returns comparison results."""
+    if not re.match(r"^[a-zA-Z0-9_\-/.]+$", candidate_model):
+        return {"error": "candidate_model contains invalid characters"}
     eval_script = PLUGIN_DIR / "scripts" / "eval-replacement.py"
     if not eval_script.exists():
         return {"error": "eval-replacement.py not found"}

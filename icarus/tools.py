@@ -1,6 +1,7 @@
 """Tool handlers — the code that runs when the LLM calls each tool."""
 
 import json
+import re
 from . import state
 
 
@@ -170,6 +171,8 @@ def fabric_eval(args: dict, **kwargs) -> str:
     candidate = args.get("candidate_model", "").strip()
     if not candidate:
         return _json({"error": "candidate_model is required"})
+    if not re.match(r"^[a-zA-Z0-9_\-/.]+$", candidate):
+        return _json({"error": "candidate_model contains invalid characters"})
     try:
         result = state.run_eval(
             candidate_model=candidate,
