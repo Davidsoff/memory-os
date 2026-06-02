@@ -19,6 +19,7 @@ import asyncio
 # ─── Config ────────────────────────────────────────────────────────────────
 OPENROUTER_KEY = os.environ.get("OPENROUTER_API_KEY")
 QDRANT_URL = os.environ.get("QDRANT_URL", "http://localhost:6333")
+QDRANT_API_KEY = os.environ.get("QDRANT_API_KEY", "")
 COLLECTION = os.environ.get("QDRANT_COLLECTION", os.environ.get("COLLECTION_NAME", "knowledge_base"))
 WIKI_ROOT = Path(os.environ.get("WIKI_ROOT", "."))
 EMBEDDING_MODEL = "qwen/qwen3-embedding-8b"
@@ -101,7 +102,7 @@ async def upsert_to_qdrant(session: aiohttp.ClientSession, points: list[dict]) -
     try:
         async with session.put(
             f"{QDRANT_URL}/collections/{COLLECTION}/points",
-            headers={"Content-Type": "application/json"},
+            headers={"Content-Type": "application/json", "api-key": QDRANT_API_KEY},
             json={"points": points},
             timeout=aiohttp.ClientTimeout(total=30),
         ) as resp:
@@ -124,7 +125,7 @@ async def main():
     connector = aiohttp.TCPConnector(limit=20)
     async with aiohttp.ClientSession(connector=connector) as session:
         # Check collection
-        async with session.get(f"{QDRANT_URL}/collections/{COLLECTION}") as r:
+        async with session.get(f"{QDRANT_URL}/collections/{COLLECTION}", headers={"api-key": QDRANT_API_KEY}) as r:
             if r.status != 200:
                 print(f"❌ Collection {COLLECTION} does not exist!")
                 sys.exit(1)

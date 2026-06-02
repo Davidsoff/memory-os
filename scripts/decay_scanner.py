@@ -29,6 +29,7 @@ from pathlib import Path
 
 # ─── Config ────────────────────────────────────────────────────────────────
 QDRANT_URL = os.environ.get("QDRANT_URL", "http://localhost:6333")
+QDRANT_API_KEY = os.environ.get("QDRANT_API_KEY", "")
 COLLECTION = os.environ.get("QDRANT_COLLECTION", "knowledge_base")
 SCROLL_LIMIT = 100  # Qdrant pagination
 LOG_DIR = Path(os.environ.get("HERMES_LOGS_DIR", str(Path.home() / ".hermes" / "logs")))
@@ -101,7 +102,7 @@ def scroll_chunks(collection: str, limit: int = SCROLL_LIMIT):
         try:
             resp = requests.post(
                 f"{QDRANT_URL}/collections/{collection}/points/scroll",
-                headers={"Content-Type": "application/json"},
+                headers={"Content-Type": "application/json", "api-key": QDRANT_API_KEY},
                 json=payload,
                 timeout=30,
             )
@@ -137,7 +138,7 @@ def update_point_archived(point_id: str, collection: str, decay_score: float, dr
     try:
         resp = requests.post(
             f"{QDRANT_URL}/collections/{collection}/points/payload",
-            headers={"Content-Type": "application/json"},
+            headers={"Content-Type": "application/json", "api-key": QDRANT_API_KEY},
             json={
                 "points": [point_id],
                 "payload": {

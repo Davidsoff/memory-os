@@ -33,6 +33,7 @@ from typing import List, Dict, Tuple, Optional
 
 # ─── Config ────────────────────────────────────────────────────────────────
 QDRANT_URL = os.environ.get("QDRANT_URL", "http://localhost:6333")
+QDRANT_API_KEY = os.environ.get("QDRANT_API_KEY", "")
 COLLECTION = os.environ.get("QDRANT_COLLECTION", "knowledge_base")
 SCROLL_LIMIT = 50  # Qdrant pagination (avoids timeout on large collections)
 SIMILARITY_THRESHOLD = 0.92
@@ -87,7 +88,7 @@ def scroll_all_chunks(collection: str) -> List[Dict]:
         try:
             resp = requests.post(
                 f"{QDRANT_URL}/collections/{collection}/points/scroll",
-                headers={"Content-Type": "application/json"},
+                headers={"Content-Type": "application/json", "api-key": QDRANT_API_KEY},
                 json=payload,
                 timeout=30,
             )

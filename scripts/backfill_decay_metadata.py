@@ -46,6 +46,7 @@ from urllib.error import URLError
 
 # ─── Config ──────────────────────────────────────────────────────────────────
 QDRANT_URL = os.environ.get("QDRANT_URL", "http://localhost:6333")
+QDRANT_API_KEY = os.environ.get("QDRANT_API_KEY", "")
 COLLECTION = os.environ.get("QDRANT_COLLECTION", os.environ.get("COLLECTION_NAME", "knowledge_base"))
 BATCH_SIZE = 200
 SCROLL_LIMIT = 200
@@ -86,7 +87,7 @@ def scroll_all() -> list[dict]:
         req = Request(
             f"{QDRANT_URL}/collections/{COLLECTION}/points/scroll",
             data=json.dumps(body).encode(),
-            headers={"Content-Type": "application/json"},
+            headers={"Content-Type": "application/json", "api-key": QDRANT_API_KEY},
         )
         try:
             with urlopen(req, timeout=30) as resp:
@@ -168,7 +169,7 @@ def upsert_batch(point_ids: list[str], payload: dict) -> bool:
     req = Request(
         f"{QDRANT_URL}/collections/{COLLECTION}/points/payload",
         data=json.dumps(body).encode(),
-        headers={"Content-Type": "application/json"},
+        headers={"Content-Type": "application/json", "api-key": QDRANT_API_KEY},
     )
     try:
         with urlopen(req, timeout=30) as resp:

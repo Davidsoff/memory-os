@@ -39,6 +39,7 @@ if not OPENROUTER_KEY:
                 break
 
 QDRANT_URL = os.environ.get("QDRANT_URL", "http://localhost:6333")
+QDRANT_API_KEY = os.environ.get("QDRANT_API_KEY", "")
 COLLECTION = os.environ.get("QDRANT_COLLECTION", "knowledge_base")
 
 EMBEDDING_MODEL = "qwen/qwen3-embedding-8b"
@@ -207,7 +208,7 @@ def search_knowledge_base(
             # Hybrid: prefetch dense + prefetch sparse → RRF
             resp = requests.post(
                 f"{QDRANT_URL}/collections/{COLLECTION}/points/query",
-                headers={"Content-Type": "application/json"},
+                headers={"Content-Type": "application/json", "api-key": QDRANT_API_KEY},
                 json={
                     "prefetch": [
                         {"query": dense_vector, "using": "dense", "limit": top_k * 3},
@@ -224,7 +225,7 @@ def search_knowledge_base(
             # Fallback: dense-only (collections with compatible named vectors)
             resp = requests.post(
                 f"{QDRANT_URL}/collections/{COLLECTION}/points/query",
-                headers={"Content-Type": "application/json"},
+                headers={"Content-Type": "application/json", "api-key": QDRANT_API_KEY},
                 json={
                     "query": dense_vector,
                     "using": "dense",
@@ -416,7 +417,7 @@ def search_with_fallback(
         if sparse_vector is not None:
             resp = requests.post(
                 f"{QDRANT_URL}/collections/{COLLECTION}/points/query",
-                headers={"Content-Type": "application/json"},
+                headers={"Content-Type": "application/json", "api-key": QDRANT_API_KEY},
                 json={
                     "prefetch": [
                         {"query": dense_vector, "using": "dense", "limit": top_k * 3},
@@ -433,7 +434,7 @@ def search_with_fallback(
         else:
             resp = requests.post(
                 f"{QDRANT_URL}/collections/{COLLECTION}/points/query",
-                headers={"Content-Type": "application/json"},
+                headers={"Content-Type": "application/json", "api-key": QDRANT_API_KEY},
                 json={
                     "query": dense_vector,
                     "using": "dense",
@@ -480,7 +481,7 @@ def search_with_fallback(
                 t_q2 = time.perf_counter()
                 resp = requests.post(
                     f"{QDRANT_URL}/collections/{COLLECTION}/points/search",
-                    headers={"Content-Type": "application/json"},
+                    headers={"Content-Type": "application/json", "api-key": QDRANT_API_KEY},
                     json={
                         "vector": dense_vector,
                         "using": "dense",
@@ -550,7 +551,7 @@ def update_last_accessed_at(chunk_ids: list) -> None:
         now = datetime.now().astimezone().isoformat()
         requests.post(
             f"{QDRANT_URL}/collections/{COLLECTION}/points/payload",
-            headers={"Content-Type": "application/json"},
+            headers={"Content-Type": "application/json", "api-key": QDRANT_API_KEY},
             json={
                 "points": chunk_ids,
                 "payload": {"last_accessed_at": now},
